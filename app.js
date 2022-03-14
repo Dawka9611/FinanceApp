@@ -5,7 +5,11 @@ var uiController = (function () {
         inputValue: ".add__value",
         addBtn: ".add__btn",
         incomeList: ".income__list",
-        expenseList: ".expenses__list"
+        expenseList: ".expenses__list",
+        budgeValue: ".budget__value",
+        incomeLabel: ".budget__income--value",
+        expenseLabel: ".budget__expenses--value",
+        persentageLabel: ".budget__expenses--percentage"
     };
 
     return {
@@ -38,6 +42,22 @@ var uiController = (function () {
             })
 
             fieldsArr[0].focus()
+        },
+
+        showBudge: function (budge) {
+            // budge: data.budge,
+            // percent: data.percent,
+            // totalInc: data.totals.inc,
+            // totalExp: data.totals.exp,
+
+            document.querySelector(DOMstrings.budgeValue).textContent = budge.budge
+            document.querySelector(DOMstrings.incomeLabel).textContent = budge.totalInc
+            document.querySelector(DOMstrings.expenseLabel).textContent = budge.totalExp
+            if (budge.percent !== 0) {
+                document.querySelector(DOMstrings.persentageLabel).textContent = budge.percent + "%"
+            } else {
+                document.querySelector(DOMstrings.persentageLabel).textContent = budge.percent
+            }
         },
 
         addListItem: function (item, type) {
@@ -125,6 +145,18 @@ var financeController = (function () {
             }
         },
 
+        deleteItems: function (type, id) {
+            var ids = data.items[type].map(function (el) {
+                return el.id
+            })
+
+            var index = ids.indexOf(id)
+
+            if (index !== -1) {
+                data.items[type].splice(index, 1)
+            }
+        },
+
         addItem: function (type, desc, val) {
             var item, id;
 
@@ -176,7 +208,7 @@ var appController = (function (uiController, financeController) {
             // 5. tootsoollig delgetsend gargah
             var budge = financeController.getBudge()
             //6. delgetsend gargah
-            console.log(budge)
+            uiController.showBudge(budge)
         }
 
     };
@@ -199,6 +231,12 @@ var appController = (function (uiController, financeController) {
         init: function () {
             console.log("Application started...");
             setupEventListeners();
+            uiController.showBudge({
+                budge: 0,
+                percent: 0,
+                totalInc: 0,
+                totalExp: 0,
+            })
         }
     };
 })(uiController, financeController);
