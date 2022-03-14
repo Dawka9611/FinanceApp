@@ -1,40 +1,85 @@
-
-
 var uiController = (function () {
-    var DOMstring = {
+    var DOMstrings = {
         inputType: ".add__type",
-        inputDesc: '.add__description',
-        inputValue: '.add__value',
-        addBtn: '.add__btn'
-    }
+        inputDescription: ".add__description",
+        inputValue: ".add__value",
+        addBtn: ".add__btn",
+        incomeList: ".income__list",
+        expenseList: ".expenses__list"
+    };
 
     return {
         getInput: function () {
             return {
-                type: document.querySelector(DOMstring.inputType).value,
-                description: document.querySelector(DOMstring.inputDesc).value,
-                value: document.querySelector(DOMstring.inputValue).value
-            }
+                type: document.querySelector(DOMstrings.inputType).value, // exp, inc
+                description: document.querySelector(DOMstrings.inputDescription).value,
+                value: parseInt(document.querySelector(DOMstrings.inputValue).value)
+            };
         },
-        getDOMstrings: function () {
-            return DOMstring
-        }
-    }
-})()
 
+        getDOMstrings: function () {
+            return DOMstrings;
+        },
+
+        clearFields: function () {
+            var fields = document.querySelectorAll(
+                DOMstrings.inputDescription + ", " + DOMstrings.inputValue
+            )
+
+            //convert list to array
+            var fieldsArr = Array.prototype.slice.call(fields)
+
+            // for (var i = 0; i < fieldsArr.length; i++) {
+            //     fieldsArr[i].value = ""
+            // }
+
+            fieldsArr.forEach(function (el, index) {
+                el.value = ""
+            })
+
+            fieldsArr[0].focus()
+        },
+
+        addListItem: function (item, type) {
+            // ÐžÑ€Ð»Ð¾Ð³Ð¾ Ð·Ð°Ñ€Ð»Ð°Ð³Ñ‹Ð½ ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚Ð¸Ð¹Ð³ Ð°Ð³ÑƒÑƒÐ»ÑÐ°Ð½ html-Ð¸Ð¹Ð³ Ð±ÑÐ»Ñ‚Ð³ÑÐ½Ñ.
+            var html, list;
+            if (type === "inc") {
+                list = DOMstrings.incomeList;
+                html =
+                    '<div class="item clearfix" id="income-%id%"><div class="item__description">$$DESCRIPTION$$</div><div class="right clearfix"><div class="item__value">$$VALUE$$</div><div class="item__delete">            <button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div>        </div></div>';
+            } else {
+                list = DOMstrings.expenseList;
+                html =
+                    '<div class="item clearfix" id="expense-%id%"><div class="item__description">$$DESCRIPTION$$</div>          <div class="right clearfix"><div class="item__value">$$VALUE$$</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn">                <i class="ion-ios-close-outline"></i></button></div></div></div>';
+            }
+            // Ð¢ÑÑ€ HTML Ð´Ð¾Ñ‚Ñ€Ð¾Ð¾ Ð¾Ñ€Ð»Ð¾Ð³Ð¾ Ð·Ð°Ñ€Ð»Ð°Ð³Ñ‹Ð½ ÑƒÑ‚Ð³ÑƒÑƒÐ´Ñ‹Ð³ REPLACE Ð°ÑˆÐ¸Ð³Ð»Ð°Ð¶ Ó©Ó©Ñ€Ñ‡Ð¸Ð»Ð¶
+            html = html.replace("%id%", item.id);
+            html = html.replace("$$DESCRIPTION$$", item.description);
+            html = html.replace("$$VALUE$$", item.value);
+
+            // Ð‘ÑÐ»Ñ‚Ð³ÑÑÑÐ½ HTML ÑÑ DOM Ñ€ÑƒÑƒ Ñ…Ð¸Ð¹Ð¶ Ó©Ð³Ð½Ó©.
+            document.querySelector(list).insertAdjacentHTML("beforeend", html);
+        }
+    };
+})();
+
+// Ð¡Ð°Ð½Ñ…Ò¯Ò¯Ñ‚ÑÐ¹ Ð°Ð¶Ð¸Ð»Ð»Ð°Ñ… ÐºÐ¾Ð½Ñ‚Ñ€Ð¾Ð»Ð»ÐµÑ€
 var financeController = (function () {
+    // private data
     var Income = function (id, description, value) {
         this.id = id;
         this.description = description;
         this.value = value;
-    }
+    };
 
+    // private data
     var Expense = function (id, description, value) {
         this.id = id;
         this.description = description;
         this.value = value;
-    }
+    };
 
+    // private data
     var data = {
         items: {
             inc: [],
@@ -44,9 +89,42 @@ var financeController = (function () {
         totals: {
             inc: 0,
             exp: 0
-        }
+        },
+
+        budge: 0,
+
+        percent: 0
+    };
+
+    var calculateTotal = function (type) {
+        var sum = 0
+        data.items[type].forEach(function (el) {
+            sum = sum + el.value
+        })
+        data.totals[type] = sum
     }
+
     return {
+        calculateBudge: function () {
+            calculateTotal('inc');
+            calculateTotal('exp');
+
+            //tosov tootsoh
+            data.budge = data.totals.inc - data.totals.exp
+            //orogo zarlagiin huvi
+            data.percent = Math.round((data.totals.exp / data.totals.inc) * 100)
+
+        },
+
+        getBudge: function () {
+            return {
+                budge: data.budge,
+                percent: data.percent,
+                totalInc: data.totals.inc,
+                totalExp: data.totals.exp,
+            }
+        },
+
         addItem: function (type, desc, val) {
             var item, id;
 
@@ -62,48 +140,67 @@ var financeController = (function () {
             }
 
             data.items[type].push(item);
+
+            return item;
         },
 
         seeData: function () {
-            return console.log('datad :>> ', datad);;
+            return data;
         }
     };
-})()
+})();
 
-// var appController = (function () {
-
-// })()
-
-var appController = (function (uiCtrl, fnCtrl) {
+// ÐŸÑ€Ð¾Ð³Ñ€Ð°Ð¼Ñ‹Ð½ Ñ…Ð¾Ð»Ð±Ð¾Ð³Ñ‡ ÐºÐ¾Ð½Ñ‚Ñ€Ð¾Ð»Ð»ÐµÑ€
+var appController = (function (uiController, financeController) {
     var ctrlAddItem = function () {
-        //1.oruulah ogogfliig delgetsend haruulah
-        var input = uiCtrl.getInput()
-        //2.irsen medeellig sanhuugin controll ru damjuulah
-        fnCtrl.addItem(input.type, input.description, input.value)
-        //3.olj awsan info-oo web-iin tohiroh hesegt haruulah
-fnCtrl.seeData()
-        //4.tosovoo tooshoh
+        // 1. oruulah ogogdloo olj awah
+        var input = uiController.getInput();
 
-        //5.etsiin uldegdel, tootsoog delgetsend haruulah
-    }
-    var setupEventListener = function () {
-        var DOM = uiCtrl.getDOMstrings()
-        document.querySelector(DOM.addBtn).addEventListener('click', function () {
-            ctrlAddItem()
-        })
-        document.addEventListener('keypress', function (event) {
+        if (input.description !== "" && input.value !== "") {
+            // 2. olj awsan ogodloo finanace moduldaa hadgalah
+            var item = financeController.addItem(
+                input.type,
+                input.description,
+                input.value
+            );
+
+            // 3. ogogdluudee delgetsin tohiroh hesegt bairluulah
+            uiController.addListItem(item, input.type);
+            uiController.clearFields()
+
+            const d = financeController.seeData()
+            console.log(d)
+
+            // 4. Tosov tootsooloh
+            financeController.calculateBudge()
+            // 5. tootsoollig delgetsend gargah
+            var budge = financeController.getBudge()
+            //6. delgetsend gargah
+            console.log(budge)
+        }
+
+    };
+
+    var setupEventListeners = function () {
+        var DOM = uiController.getDOMstrings();
+
+        document.querySelector(DOM.addBtn).addEventListener("click", function () {
+            ctrlAddItem();
+        });
+
+        document.addEventListener("keypress", function (event) {
             if (event.keyCode === 13 || event.which === 13) {
-                ctrlAddItem()
+                ctrlAddItem();
             }
-        })
-    }
+        });
+    };
 
     return {
         init: function () {
-            console.log('app started')
-            setupEventListener()
+            console.log("Application started...");
+            setupEventListeners();
         }
-    }
-})(uiController, financeController)
+    };
+})(uiController, financeController);
 
-appController.init()
+appController.init();
