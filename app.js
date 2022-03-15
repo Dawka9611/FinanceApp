@@ -18,6 +18,23 @@ var uiController = (function () {
         },
         getDOMstrings: function () {
             return DOMstring
+        },
+        addListItem: function (item, type) {
+            //orlogo zarlagiin element aguulsan html-iig beltgeh
+            var html, list
+            if (type === inc) {
+                list = '.income__list'
+                html = '<div class="item clearfix" id="income - %id%">< div class="item__description" >%description%/div ><div class="right clearfix"><div class="item__value">+ %value%</div><div class="item__delete"> <button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div >'
+            } else {
+                list = '.expenses__list'
+                html = '<div class="item clearfix" id="expense- %id%">< div class="item__description" > %description%</div ><div class="right clearfix"><div class="item__value">-  %value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div>d</div > '
+            }
+            //ter html-dee utguuda hadgalah
+            html = html.replace('%id%', item.id)
+            html = html.replace("%description%", item.description)
+            html= html.replace(' %value%', item.value)
+            //beltgesen html-ee DOM-ruu hine
+            document.querySelector(list).insertAdjacentHTML("beforeend", html)
         }
     }
 })()
@@ -64,9 +81,6 @@ var financeController = (function () {
             data.items[type].push(item);
         },
 
-        seeData: function () {
-            return console.log('datad :>> ', datad);;
-        }
     };
 })()
 
@@ -81,7 +95,7 @@ var appController = (function (uiCtrl, fnCtrl) {
         //2.irsen medeellig sanhuugin controll ru damjuulah
         fnCtrl.addItem(input.type, input.description, input.value)
         //3.olj awsan info-oo web-iin tohiroh hesegt haruulah
-fnCtrl.seeData()
+        uiCtrl.addListItem(item, input.type)
         //4.tosovoo tooshoh
 
         //5.etsiin uldegdel, tootsoog delgetsend haruulah
@@ -107,3 +121,4 @@ fnCtrl.seeData()
 })(uiController, financeController)
 
 appController.init()
+
